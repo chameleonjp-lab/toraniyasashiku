@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>🐯虎に優しく🐯</title>
+<meta name="description" content="虎を優しく受け止める60秒ミニゲーム">
+<style>
+:root{--ink:#2a190b;--muted:#6c543b;--top:env(safe-area-inset-top);--bottom:env(safe-area-inset-bottom)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+html,body{margin:0;width:100%;height:100%;max-width:100%;overflow:hidden;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);touch-action:none;overscroll-behavior:none;-webkit-user-select:none;user-select:none;background:#ffc05f}
+button{border:0;border-radius:999px;padding:12px 17px;font-size:15px;font-weight:900;color:white;background:linear-gradient(135deg,#ff9f1c,#ff5a2a);box-shadow:0 10px 22px #0002}
+button.secondary{background:#ffffffe0;color:var(--ink);box-shadow:inset 0 0 0 1px #0001}
+.app{position:fixed;inset:0;width:100vw;height:100dvh;max-width:100vw;overflow:hidden;background:radial-gradient(circle at 15% 12%,#ffffff30,transparent 25%),radial-gradient(circle at 85% 20%,#ffffff22,transparent 28%),linear-gradient(160deg,#b06a22,#7f4a1f 58%,#5f351b)}
+.game,.fx{position:absolute;inset:0;overflow:hidden}.game{z-index:1}.fx{z-index:18;pointer-events:none}
+.kanji{position:absolute;z-index:0;font:900 54px serif;color:#2a190b2e;pointer-events:none}.kanji.l{left:24px;bottom:48px}.kanji.r{right:24px;top:118px}
+.hud{position:absolute;z-index:20;top:calc(8px + var(--top));left:8px;right:8px;display:flex;gap:5px;justify-content:space-between;pointer-events:none}
+.pill{min-width:72px;padding:7px;border-radius:999px;background:#ffffffc7;text-align:center;font-weight:950;backdrop-filter:blur(8px);font-size:13px}.pill small{display:block;font-size:10px;color:var(--muted)}
+.pause{min-width:78px;padding:7px 9px;font-size:12px;background:#2a190bd1;pointer-events:auto}
+.msg{position:absolute;z-index:22;top:calc(60px + var(--top));left:10px;right:10px;padding:9px 12px;border-radius:16px;background:#ffffffc7;text-align:center;font-weight:950;transition:.15s;pointer-events:none}.msg.hide{opacity:0;transform:translateY(-8px)}
+.toast{position:absolute;z-index:60;left:50%;top:calc(18px + var(--top));transform:translateX(-50%) translateY(-10px);padding:10px 14px;border-radius:999px;background:#2a190be0;color:white;font-size:13px;font-weight:900;opacity:0;pointer-events:none;transition:.14s;white-space:nowrap}.toast.show{opacity:1;transform:translateX(-50%)}
+.count{position:absolute;inset:0;z-index:35;display:none;place-items:center;background:#ffe6aa61;font-size:clamp(80px,28vw,150px);font-weight:1000;color:#ff5a2a;text-shadow:0 12px 26px #0003;pointer-events:none}.count.show{display:grid}
+.screen{position:absolute;inset:0;z-index:45;display:grid;place-items:center;padding:calc(18px + var(--top)) 14px calc(18px + var(--bottom));background:radial-gradient(circle at 50% 18%,#ffffffe5,transparent 34%),linear-gradient(160deg,#fff8dbf5,#ffc369f2);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}.hidden{display:none!important}
+.panel{width:min(94vw,470px);padding:20px 15px;border-radius:28px;background:#ffffffe8;box-shadow:0 18px 48px #5f370a40;border:1px solid #ffffffb8;text-align:center}
+.eyebrow{margin:0 0 8px;color:var(--muted);font-size:12px;font-weight:950}h1{margin:0;font-size:clamp(32px,9vw,46px);letter-spacing:-.05em}h2{margin:0 0 10px;font-size:28px}
+.big{font-size:64px;margin:12px 0 8px;filter:drop-shadow(0 9px 10px #0002);animation:floaty 1.5s ease-in-out infinite alternate}@keyframes floaty{to{transform:translateY(-9px) rotate(2deg)}}
+.lead{margin:10px auto 12px;max-width:360px;line-height:1.6;color:var(--muted);font-weight:800;font-size:14px}.best{margin:10px auto 8px;padding:9px 12px;border-radius:16px;background:#ffffff9e;font-weight:950}
+.actions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}.homeActions{margin:12px 0 14px}.rules{display:grid;gap:6px;text-align:left;margin:12px 0 16px}.rule{padding:8px 10px;border-radius:13px;background:#ffffff9e;font-size:12.5px;font-weight:850;line-height:1.42}.warn{background:#e639461a!important;color:#8d111b}.tiny{margin-top:12px;color:var(--muted);font-size:11px}.scoreLine{font-size:18px;font-weight:950}
+.homeTiger{position:relative;display:inline-block;min-width:92px;min-height:86px;line-height:86px}.spark{position:absolute;left:50%;top:50%;font-size:18px;opacity:0;animation:spark 1.45s ease-out infinite;pointer-events:none}@keyframes spark{18%{opacity:1}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(1.25)}}
+.obj{position:absolute;left:0;top:0;z-index:5;width:58px;height:58px;display:grid;place-items:center;pointer-events:none;transform:translate3d(-999px,-999px,0);will-change:transform,opacity;filter:drop-shadow(0 2px 0 #fff8) drop-shadow(0 6px 8px #0008);line-height:1}
+.tiger{font-size:42px}.bath{font-size:40px}.spinach,.clock,.boy{font-size:38px}.wifi{font-size:40px}.blink{opacity:0}.base{position:absolute;left:50%;bottom:6px;width:38px;height:5px;margin-left:-19px;border-radius:999px;background:#145d2b2e}
+.player{position:absolute;left:0;top:0;z-index:12;width:74px;height:74px;display:none;place-items:center;font-size:54px;pointer-events:none;transform:translate3d(-999px,-999px,0);will-change:transform;filter:drop-shadow(0 6px 10px #0004)}
+.player.active{display:grid}.player:after{content:"";position:absolute;inset:8px;border-radius:999px;background:#ff8c1a26;opacity:0}.player.touch:after{opacity:1}
+.ft{position:absolute;z-index:30;left:0;top:0;padding:3px 8px;border-radius:999px;font-size:17px;font-weight:950;color:#2a190b;background:#ffffffe8;transform:translate3d(var(--x),var(--y),0);opacity:0;animation:ft .95s ease-out forwards;white-space:nowrap;pointer-events:none;box-shadow:0 4px 10px #0003;text-shadow:0 1px 0 #fff}@keyframes ft{0%{opacity:0;transform:translate3d(var(--x),var(--y),0) scale(.88)}18%{opacity:1;transform:translate3d(var(--x),var(--y),0) scale(1)}100%{opacity:0;transform:translate3d(var(--x),calc(var(--y) - 48px),0) scale(1.08)}}
+.burst{position:absolute;z-index:23;font-size:17px;animation:burst .68s ease-out forwards;pointer-events:none}@keyframes burst{0%{opacity:0;transform:translate3d(var(--x),var(--y),0) scale(.55)}20%{opacity:1}100%{opacity:0;transform:translate3d(calc(var(--x) + var(--dx)),calc(var(--y) + var(--dy)),0) scale(1.12)}}.red{animation:red .1s ease-in-out 0s 4 alternate}@keyframes red{to{filter:sepia(.65) saturate(2.4) hue-rotate(315deg)}}
+.pauseBox{position:absolute;inset:0;z-index:55;display:grid;place-items:center;padding:20px;background:#2a190b61;backdrop-filter:blur(4px)}.pausePanel{width:min(88vw,360px);padding:22px 16px;border-radius:26px;background:#ffffffe8;text-align:center;box-shadow:0 18px 48px #5f370a40}.itemCounts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:12px 0;text-align:left}.itemCounts div{padding:8px 10px;border-radius:12px;background:#ffffff9e;font-size:13px;font-weight:850}
+
+.nameInput{width:min(82vw,320px);padding:12px 14px;border-radius:14px;border:1px solid #0002;font-size:16px;font-weight:850;background:#fffffff2;color:var(--ink)}
+.warnText{min-height:18px;margin:8px 0 0;color:#8d111b;font-size:12px;font-weight:850}
+.rankBox{margin:12px 0;padding:10px;border-radius:16px;background:#ffffff9e;text-align:left}
+.rankTabs{display:flex;gap:8px;margin-bottom:8px}
+.rankTabs button{flex:1;padding:9px 10px;font-size:13px}
+.rankTabs button.off{background:#ffffffe0;color:var(--ink);box-shadow:inset 0 0 0 1px #0001}
+.rankTitle{font-weight:950;margin:4px 0 6px;text-align:center}
+.rankLine{padding:6px 8px;border-radius:10px;background:#ffffffad;margin:4px 0;font-size:13px;font-weight:850;overflow-wrap:anywhere}
+.syncBox{margin:10px 0;padding:9px 10px;border-radius:14px;background:#ffffff9e;font-size:13px;font-weight:850;text-align:left;line-height:1.55;overflow-wrap:anywhere}
+
+
+#home{overflow:hidden}
+#home .panel{max-height:calc(100dvh - 28px - var(--top) - var(--bottom));overflow:hidden}
+#home h1{font-size:clamp(28px,8vw,42px)}
+#home .big{font-size:58px;margin:8px 0 5px}
+#home .lead{margin:8px auto 9px;font-size:13.5px;line-height:1.5}
+#home .best{margin:7px auto 6px;padding:7px 10px}
+#home .homeActions{margin:9px 0 10px}
+#home .tiny{margin-top:8px}
+#home .rules{max-height:36dvh;overflow-y:auto;overflow-x:hidden;padding-right:2px}
+
+
+button,.panel,.screen,.pill,.msg,.toast,.rule,.rankLine,.syncBox,.itemCounts,.lead,.best,h1,h2,p,div,span{
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  user-select:none;
+}
+input,textarea{
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  user-select:none;
+}
+
+
+#resultActions.locked{
+  display:none;
+}
+
+</style></head><body>
+<div class="app" id="app">
+<div class="kanji l">虎</div><div class="kanji r">優</div>
+<div class="game" id="game"><div class="player" id="player">👐</div></div><div class="fx" id="fx"></div>
+<div class="hud"><div class="pill"><small>TIME</small><span id="time">60.0</span></div><div class="pill"><small>SCORE</small><span id="score">0</span></div><div class="pill"><small>DROP</small><span id="drop">0</span></div><button type="button" class="pause" id="pause">一時停止</button></div>
+<div class="msg hide" id="msg">虎に優しく</div><div class="toast" id="toast">コピーしました</div><div class="count" id="count">3</div>
+<section class="pauseBox hidden" id="pauseBox"><div class="pausePanel"><h2>一時停止中</h2><div class="actions"><button id="resume" type="button">再開</button><button id="retire" type="button" class="secondary">リタイア</button></div></div></section>
+
+<section class="screen hidden" id="nameScreen"><div class="panel"><p class="eyebrow">プレイヤー名</p><h2>名前を入力</h2><p class="lead">ランキングに表示する名前を入力してください。<br>次回からは保存した名前で始めます。</p><input id="playerNameInput" class="nameInput" maxlength="20" autocomplete="nickname" placeholder="20文字以内"><p class="warnText" id="nameError"></p><div class="actions"><button id="nameOk" type="button">この名前で始める</button></div></div></section>
+
+<section class="screen" id="home"><div class="panel"><p class="eyebrow">60秒ミニゲーム</p><h1>🐯虎に優しく🐯</h1><div class="big homeTiger" id="homeTiger">🐯</div><div class="best">ベストスコア：<span id="homeBest">0</span>点</div><p class="lead">タップした場所に手が出ます。<br>画面内を自由に動かして、虎を優しく受け止めましょう。</p><div class="actions homeActions"><button id="start" type="button">ゲーム開始</button><button id="shareGame" type="button" class="secondary">ゲームをシェア</button><button id="rulesBtn" type="button" class="secondary">ルール説明</button></div><div class="rules hidden" id="rules"><div class="rule">👐 画面をタップすると手が出ます。指を動かして操作します。</div><div class="rule">🐯 虎を受け止めると +200点。落とすと -3000点。</div><div class="rule">🐯を落としてもゲーム終了にはなりません。落下回数は結果に表示されます。</div><div class="rule">🛁 お風呂に触れると -700点。</div><div class="rule">🥬 ほうれん草は1.5秒ごとに出ます。短くタップして消すと +200点。残すと1.5秒ごとに -600点。</div><div class="rule">🕗 時計は2つ同時に出ます。触れると残り時間が -3秒。</div><div class="rule">👦🏻 男の子に触れると +3秒。逃すと -2秒。</div><div class="rule">🛜 Wi-Fiに触れると、ばらけた位置から虎が3体追加。逃すと -3000点。</div><div class="rule">🐯と🛁は画面全体からばらばらに落ちます。ガッツリ重なる配置だけ避けます。</div></div><p class="tiny">ハイスコアはこの端末のブラウザに保存されます。</p></div></section>
+<section class="screen hidden" id="result"><div class="panel"><p class="eyebrow" id="resultLabel">RESULT</p><h2 id="resultTitle">結果</h2><div class="big" id="resultEmoji">🐯</div><p class="lead" id="resultText"></p><div class="actions" id="resultActions"><button id="retry" type="button">もう一度</button><button id="endGame" type="button" class="secondary">ゲーム終了</button><button id="shareResult" type="button" class="secondary">結果をシェア</button></div><p class="tiny" id="copyStatus"></p></div></section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(()=>{"use strict";
+const $=id=>document.getElementById(id),app=$("app"),game=$("game"),fx=$("fx"),playerEl=$("player"),home=$("home"),nameScreen=$("nameScreen"),playerNameInput=$("playerNameInput"),nameError=$("nameError"),result=$("result"),count=$("count"),pauseBox=$("pauseBox"),msg=$("msg"),toast=$("toast"),timeEl=$("time"),scoreEl=$("score"),dropEl=$("drop"),homeBest=$("homeBest"),resultLabel=$("resultLabel"),resultTitle=$("resultTitle"),resultEmoji=$("resultEmoji"),resultText=$("resultText"),copyStatus=$("copyStatus"),rules=$("rules"),rulesBtn=$("rulesBtn"),homeTiger=$("homeTiger"),resultActions=$("resultActions");
+const SUPABASE_URL="https://mlpnjgezrnhdxsxolyzj.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_drzcy0v97knU6FgjqSgBHw_0A9XPdFM";
+const GAME_SLUG="torani_yasashiku";
+const CLIENT_VERSION="torani_yasashiku-ranking-v1";
+const PUBLIC_URL="https://chameleonjp.codeberg.page/torani_yasashiku/";
+const GAME_TITLE="🐯虎に優しく🐯";
+const NAME_KEY="torani_yasashiku_player_name";
+const sb=window.supabase&&SUPABASE_PUBLISHABLE_KEY&&!SUPABASE_PUBLISHABLE_KEY.includes("ここに")?window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY):null;
+const KEY="torani_yasashiku_high_score",G=60,TIGER_BATH_MIN_GAP=8,OBJ={tiger:["🐯",28,"tiger"],bath:["🛁",29,"bath"],spinach:["🥬",27,"spinach"],clock:["🕗",28,"clock"],boy:["👦🏻",28,"boy"],wifi:["🛜",30,"wifi"]},SPD={tiger:351,bath:316,clock:190,wifi:-330,boy:-243},MSG={tiger:["もっと愛して！","優秀リスナー！","配信きてね！"],bath:["風呂は嫌だ！","風呂キャン上等","入ってないよ？"],spinachTap:["誰が食うんや！"],spinachPenalty:["雑草だろ"],clock:["予定は嫌い！"],boy:["ショタコンだよ！"],wifi:["配信できない！","ツイッチみて！","サブスク入って！"]};
+let W=320,H=480,mode="home",last=0,startAt=0,elapsed=0,pauseAt=0,score=0,high=loadHigh(),drop=0,objects=[],nextId=1,player={x:0,y:0,r:28,visible:false},msgTimer=0,tapStart=null,counts={},special={},timers={},laneCounts={tiger:[0,0,0],bath:[0,0,0],spinach:[0,0,0]},playerName="",scoreSubmitted=false,lastSubmitInfo=null,rankState={active:"best",best:null,first:null};
+const rand=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),choice=a=>a[Math.floor(Math.random()*a.length)],fmt=n=>Math.round(n).toLocaleString("ja-JP");
+function loadHigh(){try{const ks=[KEY,"torani_yasashiku_high_dom_v10","torani_yasashiku_high_dom_v7","torani_yasashiku_high_dom_v5","torani_yasashiku_best_score_dom_v4","torani_yasashiku_best_score_v2"];return Math.max(...ks.map(k=>Number(localStorage.getItem(k)||0)).filter(n=>!isNaN(n)))}catch(e){return 0}}function saveHigh(v){try{localStorage.setItem(KEY,String(v))}catch(e){}}
+function url(){return PUBLIC_URL}function showToast(t){toast.textContent=t;toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),1000)}
+async function writeClip(t){if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(t);return}const a=document.createElement("textarea");a.value=t;a.setAttribute("readonly","");a.style.position="fixed";a.style.left="-9999px";a.style.top="0";document.body.appendChild(a);a.focus();a.select();const ok=document.execCommand("copy");a.remove();if(!ok)throw new Error("copy failed")}
+async function copy(t,n="クリップボードにコピーしました"){try{await writeClip(t);showToast(n);copyStatus.textContent=n;setTimeout(()=>copyStatus.textContent="",1000)}catch(e){showToast("コピーできませんでした");copyStatus.textContent="コピーできませんでした";setTimeout(()=>copyStatus.textContent="",1000)}}
+function countText(){return `🐯${counts.tiger||0} / 🛁${counts.bath||0} / 🥬${counts.spinach||0} / 🕗${counts.clock||0} / 👦🏻${counts.boy||0} / 🛜${counts.wifi||0}`}
+function countsHtml(){return `<div class="itemCounts"><div>🐯 虎：${counts.tiger||0}</div><div>🛁 お風呂：${counts.bath||0}</div><div>🥬 ほうれん草：${counts.spinach||0}</div><div>🕗 時計：${counts.clock||0}</div><div>👦🏻 男の子：${counts.boy||0}</div><div>🛜 Wi-Fi：${counts.wifi||0}</div></div>`}
+async function shareText(t,okMsg="クリップボードにコピーしました"){
+  try{
+    if(navigator.share){
+      await navigator.share({title:GAME_TITLE,text:t});
+      showToast("シェア画面を開きました");
+      copyStatus.textContent="シェア画面を開きました";
+      setTimeout(()=>copyStatus.textContent="",1000);
+    }else{
+      await copy(t,okMsg);
+    }
+  }catch(e){
+    showToast("シェアをキャンセルしました");
+    copyStatus.textContent="シェアをキャンセルしました";
+    setTimeout(()=>copyStatus.textContent="",1000);
+  }
+}
+function shareGame(){shareText(`${GAME_TITLE}で遊んでみて！\n${url()}`)}
+function shareResult(){const[r]=rank(),fs=lastSubmitInfo&&lastSubmitInfo.result_first_score!=null?`\n初回挑戦スコア：${fmt(lastSubmitInfo.result_first_score)}点`:"",bs=lastSubmitInfo&&lastSubmitInfo.result_best_score!=null?lastSubmitInfo.result_best_score:high;shareText(`${GAME_TITLE}で ${fmt(score)}点！${fs}\n最高スコア：${fmt(bs)}点\n評価：${r}\n虎落下：${drop}回\n取得回数：${countText()}\n${url()}\n#虎に優しく`,"結果をクリップボードにコピーしました")}
+
+function savedName(){try{return (localStorage.getItem(NAME_KEY)||"").trim().slice(0,20)}catch(e){return ""}}
+function saveName(n){try{localStorage.setItem(NAME_KEY,n)}catch(e){}}
+function startWithNameGate(){
+  const n=savedName();
+  if(n){playerName=n;start();return}
+  nameError.textContent="";
+  playerNameInput.value="";
+  home.classList.add("hidden");
+  result.classList.add("hidden");
+  pauseBox.classList.add("hidden");
+  nameScreen.classList.remove("hidden");
+  mode="name";
+  setTimeout(()=>playerNameInput.focus(),80);
+}
+function confirmName(){
+  const n=(playerNameInput.value||"").trim().slice(0,20);
+  if(!n){nameError.textContent="名前を入力してください";return}
+  playerName=n;
+  saveName(n);
+  nameScreen.classList.add("hidden");
+  start();
+}
+function localResultBase(){
+  const [r,c,e]=rank();
+  return {r,c,e};
+}
+
+function errorText(e){
+  if(!e)return "理由不明";
+  if(typeof e==="string")return e;
+  const parts=[];
+  if(e.message)parts.push(e.message);
+  if(e.code)parts.push("code:"+e.code);
+  if(e.details)parts.push(e.details);
+  if(e.hint)parts.push(e.hint);
+  return parts.join(" / ")||"理由不明";
+}
+function supabaseNotReadyText(){
+  if(!window.supabase)return "Supabaseライブラリを読み込めていません";
+  if(!SUPABASE_PUBLISHABLE_KEY||SUPABASE_PUBLISHABLE_KEY.includes("ここに"))return "Publishable key が未設定です";
+  return "Supabaseクライアントを作成できませんでした";
+}
+function submitInfoHtml(info){
+  if(!info)return `<div class="syncBox" id="syncBox">スコアを送信中です。完了までお待ちください...</div>`;
+  if(info.error)return `<div class="syncBox" id="syncBox">ランキング連携に失敗しました😅</div>`;
+  const first=info.result_first_score, best=info.result_best_score, play=info.result_play_count;
+  const flags=[];
+  if(info.is_first_play)flags.push("初挑戦スコアを登録しました");
+  if(info.is_new_best)flags.push("自己ベスト更新！");
+  return `<div class="syncBox" id="syncBox">今回スコア：${fmt(score)}点<br>初回挑戦スコア：${fmt(first)}点<br>最高スコア：${fmt(best)}点<br>プレイ回数：${fmt(play)}回${flags.length?`<br>${flags.join("<br>")}`:""}</div>`;
+}
+function rankingShell(){
+  return `<div class="rankBox" id="rankBox"><div class="rankTabs"><button id="rankBest" type="button">最高スコア</button><button id="rankFirst" type="button" class="off">初挑戦</button></div><div id="rankContent"><div class="rankTitle">最高スコアランキング</div><div class="rankLine">取得中...</div></div></div>`;
+}
+function renderResultExtra(){
+  const {c}=localResultBase();
+  resultText.innerHTML=`<span class="scoreLine">${fmt(score)}点</span><br>虎落下：${drop}回${countsHtml()}${submitInfoHtml(lastSubmitInfo)}${rankingShell()}${c}`;
+  setupRankTabs();
+  renderRanking();
+}
+function setupRankTabs(){
+  const b=$("rankBest"), f=$("rankFirst");
+  if(!b||!f)return;
+  b.onclick=()=>{rankState.active="best";renderRanking()};
+  f.onclick=()=>{rankState.active="first";renderRanking()};
+}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function rowName(row){return esc(row.display_name||row.player_name||row.name||"名無し")}
+function rowScore(row,kind){return kind==="first"?(row.first_score??row.score??row.result_first_score??0):(row.best_score??row.score??row.result_best_score??0)}
+function renderRanking(){
+  const el=$("rankContent"), b=$("rankBest"), f=$("rankFirst");
+  if(!el)return;
+  if(b&&f){b.classList.toggle("off",rankState.active!=="best");f.classList.toggle("off",rankState.active!=="first")}
+  const kind=rankState.active, title=kind==="best"?"最高スコアランキング":"初挑戦ランキング", data=rankState[kind];
+  if(data===null){el.innerHTML=`<div class="rankTitle">${title}</div><div class="rankLine">取得中...</div>`;return}
+  if(data&&data.error){el.innerHTML=`<div class="rankTitle">${title}</div><div class="rankLine">ランキング連携に失敗しました😅</div>`;return}
+  const rows=Array.isArray(data)?data:[];
+  if(!rows.length){el.innerHTML=`<div class="rankTitle">${title}</div><div class="rankLine">ランキング反映待ちです。少し待ってからもう一度確認してください</div>`;return}
+  el.innerHTML=`<div class="rankTitle">${title}</div>`+rows.slice(0,3).map((r,i)=>`<div class="rankLine">${i+1}位　${rowName(r)}　${fmt(rowScore(r,kind))}点</div>`).join("");
+}
+function lockResultActions(on){
+  if(!resultActions)return;
+  resultActions.classList.toggle("locked",!!on);
+}
+async function submitScoreOnce(){
+  if(scoreSubmitted)return !!lastSubmitInfo&&!lastSubmitInfo.error;
+  scoreSubmitted=true;
+  lastSubmitInfo=null;
+  renderResultExtra();
+  if(!sb){lastSubmitInfo={error:true,message:supabaseNotReadyText()};console.warn("Supabase not ready:",lastSubmitInfo.message);renderResultExtra();return false}
+  try{
+    const {data,error}=await sb.rpc("submit_score",{p_display_name:playerName,p_game_slug:GAME_SLUG,p_score:score,p_client_version:CLIENT_VERSION});
+    if(error)throw error;
+    const row=Array.isArray(data)?data[0]:data;
+    lastSubmitInfo=row||{};
+    if(lastSubmitInfo.result_best_score!=null&&Number(lastSubmitInfo.result_best_score)>high){high=Number(lastSubmitInfo.result_best_score);saveHigh(high);homeBest.textContent=fmt(high)}
+    renderResultExtra();
+    return true;
+  }catch(e){
+    console.error("submit_score failed:",e);
+    lastSubmitInfo={error:true,message:errorText(e)};
+    renderResultExtra();
+    return false;
+  }
+}
+async function loadRankings(){
+  rankState={active:"best",best:null,first:null};
+  renderRanking();
+  if(!sb){const m=supabaseNotReadyText();rankState.best={error:true,message:m};rankState.first={error:true,message:m};console.warn("Supabase not ready:",m);renderRanking();return}
+  try{
+    const [best,first]=await Promise.all([
+      sb.rpc("get_best_score_ranking",{p_game_slug:GAME_SLUG,p_limit:3}),
+      sb.rpc("get_first_try_ranking",{p_game_slug:GAME_SLUG,p_limit:3})
+    ]);
+    rankState.best=best.error?{error:true,message:errorText(best.error)}:best.data;
+    rankState.first=first.error?{error:true,message:errorText(first.error)}:first.data;
+    if(best.error)console.error("get_best_score_ranking failed:",best.error);
+    if(first.error)console.error("get_first_try_ranking failed:",first.error);
+  }catch(e){
+    console.error("ranking load failed:",e);
+    const m=errorText(e);
+    rankState.best={error:true,message:m};rankState.first={error:true,message:m};
+  }
+  renderRanking();
+}
+function resize(){const r=app.getBoundingClientRect();W=Math.max(320,Math.floor(r.width));H=Math.max(480,Math.floor(r.height));player.x=clamp(player.x||W/2,0,W);player.y=clamp(player.y||H*.78,0,H);placePlayer()}
+function setupHome(){homeBest.textContent=fmt(high);if(homeTiger.dataset.ready==="1")return;homeTiger.dataset.ready="1";[{x:"-54px",y:"-46px",d:"0s"},{x:"48px",y:"-42px",d:".18s"},{x:"-62px",y:"10px",d:".36s"},{x:"56px",y:"14px",d:".54s"},{x:"-28px",y:"52px",d:".72s"},{x:"32px",y:"52px",d:".90s"}].forEach(s=>{const e=document.createElement("span");e.className="spark";e.textContent="✨";e.style.setProperty("--x",s.x);e.style.setProperty("--y",s.y);e.style.animationDelay=s.d;homeTiger.appendChild(e)})}
+function say(t,ms=1100){msg.textContent=t;msg.classList.remove("hide");msgTimer=ms}function hud(){timeEl.textContent=Math.max(0,G-elapsed).toFixed(1);scoreEl.textContent=fmt(score);dropEl.textContent=drop}
+function create(type,x,y,vx,vy){const d=OBJ[type],el=document.createElement("div");el.className="obj "+d[2];el.textContent=d[0];if(type==="spinach"){const b=document.createElement("span");b.className="base";el.appendChild(b)}game.appendChild(el);const o={id:nextId++,type,el,x,y,vx:vx||0,vy:vy||0,r:d[1],age:0,tick:0,blinkMs:0,removed:false};if(type==="boy")o.blinkMs=200;if(type==="wifi")o.blinkMs=300;objects.push(o);place(o);return o}
+function place(o){o.el.style.transform=`translate3d(${o.x-29}px,${o.y-29}px,0)`}function placePlayer(){if(!player.visible)return;playerEl.style.transform=`translate3d(${player.x-37}px,${player.y-37}px,0)`}
+function remove(o){if(o.removed)return;o.removed=true;o.el.remove()}
+function laneNo(x){return clamp(Math.floor(x/(W/3)),0,2)}
+function laneRange(n,r){
+  const left=W*n/3+r+12,right=W*(n+1)/3-r-12;
+  if(right<=left)return [r+14,W-r-14];
+  return [left,right];
+}
+function leastLane(type){
+  const a=laneCounts[type]||[0,0,0], m=Math.min(a[0],a[1],a[2]), list=[0,1,2].filter(i=>a[i]===m);
+  if(Math.random()<0.55)return list[Math.floor(Math.random()*list.length)];
+  return Math.floor(Math.random()*3);
+}
+function markLane(type,x){if(laneCounts[type])laneCounts[type][laneNo(x)]++}
+function pairGap(type,o,r){
+  if((type==="tiger"&&o.type==="bath")||(type==="bath"&&o.type==="tiger"))return TIGER_BATH_MIN_GAP;
+  return r+o.r+3;
+}
+function laneHit(x,r,type){
+  for(const o of objects){
+    if(o.removed)continue;
+    if(type==="tiger"&&!(o.type==="tiger"||o.type==="bath"))continue;
+    if(type==="bath"&&!(o.type==="tiger"))continue;
+    if(Math.abs(o.x-x)<pairGap(type,o,r))return true;
+  }
+  return false;
+}
+function clearanceScore(x,r,type){
+  let score=9999;
+  for(const o of objects){
+    if(o.removed)continue;
+    if(type==="tiger"&&!(o.type==="tiger"||o.type==="bath"))continue;
+    if(type==="bath"&&!(o.type==="tiger"))continue;
+    const gap=Math.abs(o.x-x)-pairGap(type,o,r);
+    score=Math.min(score,gap);
+  }
+  return score;
+}
+function safeLaneX(type,r,preferredLane=null){
+  if(type==="tiger"||type==="bath"){
+    const a=r+14,b=W-r-14;
+    let bestX=null,bestScore=-99999;
+    for(let i=0;i<44;i++){
+      const x=rand(a,b), s=clearanceScore(x,r,type);
+      if(s>bestScore){bestScore=s;bestX=x}
+      if(!laneHit(x,r,type)&&Math.random()<0.42){markLane(type,x);return x}
+    }
+    const x=bestX===null?rand(a,b):bestX;
+    markLane(type,x);
+    return x;
+  }
+  const first=preferredLane===null?leastLane(type):preferredLane;
+  const order=[first,...[0,1,2].filter(i=>i!==first).sort(()=>Math.random()-.5)];
+  let bestX=null,bestScore=-99999;
+  for(const lane of order){
+    const [a,b]=laneRange(lane,r);
+    for(let i=0;i<28;i++){
+      const x=rand(a,b), s=clearanceScore(x,r,type);
+      if(s>bestScore){bestScore=s;bestX=x}
+      if(!laneHit(x,r,type)){markLane(type,x);return x}
+    }
+  }
+  const x=bestX===null?rand(r+14,W-r-14):bestX;
+  markLane(type,x);
+  return x;
+}
+function safeX(type,r){return safeLaneX(type,r)}
+function safeSpinachX(r){
+  const first=leastLane("spinach");
+  const order=[first,...[0,1,2].filter(i=>i!==first).sort(()=>Math.random()-.5)];
+  for(const lane of order){
+    const [a,b]=laneRange(lane,r);
+    for(let i=0;i<24;i++){
+      const x=rand(a,b);
+      let hit=false;
+      for(const o of objects){
+        if(!o.removed&&o.type==="bath"&&Math.abs(o.x-x)<r+o.r+3)hit=true;
+      }
+      if(!hit){markLane("spinach",x);return x}
+    }
+  }
+  const [a,b]=laneRange(first,r), x=rand(a,b);
+  markLane("spinach",x);
+  return x;
+}
+
+function addClockPair(){
+  const r=OBJ.clock[1], minGap=r*4;
+  let y1=rand(112,H-118), y2=rand(112,H-118);
+  for(let i=0;i<80&&Math.abs(y1-y2)<minGap;i++){
+    y2=rand(112,H-118);
+  }
+  if(Math.abs(y1-y2)<minGap){
+    if(y1 < H/2){
+      y2=clamp(y1+minGap,112,H-118);
+    }else{
+      y2=clamp(y1-minGap,112,H-118);
+    }
+  }
+  create("clock",-r-18,y1,SPD.clock,0);
+  create("clock",-r-18,y2,SPD.clock,0);
+}
+function add(type,xForced=null){
+  if(type==="tiger"){
+    const r=OBJ.tiger[1], lane=xForced===null?null:laneNo(xForced);
+    const x=xForced===null?safeX("tiger",r):safeLaneX("tiger",r,lane);
+    create("tiger",x,-r-18,0,SPD.tiger);
+  }
+  if(type==="bath"){
+    const r=OBJ.bath[1];
+    create("bath",safeX("bath",r),-r-18,0,SPD.bath);
+  }
+  if(type==="spinach"){
+    const r=OBJ.spinach[1];
+    create("spinach",safeSpinachX(r),H-r-16,0,0);
+  }
+  if(type==="clock"){
+    const r=OBJ.clock[1];
+    create("clock",-r-18,rand(112,H-118),SPD.clock,0);
+  }
+  if(type==="boy"){
+    const r=OBJ.boy[1];
+    create("boy",W+r+18,rand(112,H-100),SPD.boy,0);
+  }
+  if(type==="wifi"){
+    const r=OBJ.wifi[1];
+    create("wifi",rand(r+22,W-r-22),H+r+18,0,SPD.wifi);
+  }
+}
+function wifiTigers(){const lanes=[0,1,2].sort(()=>Math.random()-.5);lanes.forEach((lane,i)=>setTimeout(()=>{if(mode==="play")add("tiger",W*(lane+.5)/3)},i*200))}
+function burst(x,y,emoji,count=8){for(let i=0;i<count;i++){const e=document.createElement("span");e.className="burst";e.textContent=emoji;const a=rand(0,Math.PI*2),d=rand(22,58);e.style.setProperty("--x",`${x}px`);e.style.setProperty("--y",`${y}px`);e.style.setProperty("--dx",`${Math.cos(a)*d}px`);e.style.setProperty("--dy",`${Math.sin(a)*d}px`);fx.appendChild(e);setTimeout(()=>e.remove(),720)}}
+function text(x,y,t){const e=document.createElement("div");e.className="ft";e.textContent=t;e.style.setProperty("--x",`${clamp(x-40,8,W-160)}px`);e.style.setProperty("--y",`${clamp(y-32,70,H-70)}px`);fx.appendChild(e);setTimeout(()=>e.remove(),1000)}
+function react(o,t,emoji,c=8){say(t);text(o.x,o.y,t);burst(o.x,o.y,emoji,c)}
+function active(o){return !o.blinkMs||Math.floor(o.age/o.blinkMs)%2===0}function collide(o){if(!player.visible)return false;const dx=o.x-player.x,dy=o.y-player.y,rr=o.r+player.r;return dx*dx+dy*dy<=rr*rr}
+function addCount(t){counts[t]=(counts[t]||0)+1}
+function hit(o){if(o.removed||o.type==="spinach")return;if(o.type==="tiger"){score+=200;addCount("tiger");react(o,choice(MSG.tiger),"✨",8)}if(o.type==="bath"){score-=700;addCount("bath");react(o,choice(MSG.bath),"💦",7)}if(o.type==="clock"){startAt-=3000;addCount("clock");react(o,MSG.clock[0],"🌀",6)}if(o.type==="boy"){startAt+=3000;addCount("boy");react(o,MSG.boy[0],"⏱️",6)}if(o.type==="wifi"){addCount("wifi");react(o,choice(MSG.wifi),"🐯",7);wifiTigers()}remove(o)}
+function tapSpinach(x,y){for(const o of objects){if(o.removed||o.type!=="spinach")continue;const dx=o.x-x,dy=o.y-y;if(dx*dx+dy*dy<=(o.r+22)*(o.r+22)){score+=200;addCount("spinach");react(o,MSG.spinachTap[0],"🥬",7);remove(o);return true}}return false}
+function missObj(o){if(o.removed)return;if(o.type==="tiger"){drop++;score-=3000;say("🐯 虎を落とした… -3000点");app.classList.add("red");setTimeout(()=>app.classList.remove("red"),700)}if(o.type==="boy"){startAt-=2000;say("👦🏻 逃した… -2秒")}if(o.type==="wifi"){score-=3000;say("🛜 配信できない！ -3000")}remove(o)}
+function reset(){lockResultActions(false);mode="play";elapsed=0;score=0;drop=0;nextId=1;scoreSubmitted=false;lastSubmitInfo=null;rankState={active:"best",best:null,first:null};counts={tiger:0,bath:0,spinach:0,clock:0,boy:0,wifi:0};laneCounts={tiger:[0,0,0],bath:[0,0,0],spinach:[0,0,0]};objects.forEach(o=>o.el.remove());objects=[];fx.innerHTML="";special={boy15:false,boy30:false,boy45:false,wifi20:false,wifi40:false};timers={tiger:0,bath:400,spinach:900,clock:10000};player={x:W/2,y:H*.78,r:28,visible:false};tapStart=null;playerEl.classList.remove("active","touch");pauseBox.classList.add("hidden");app.dataset.warned="";startAt=performance.now();pauseAt=0;last=startAt;hud()}
+function start(){home.classList.add("hidden");nameScreen.classList.add("hidden");result.classList.add("hidden");pauseBox.classList.add("hidden");copyStatus.textContent="";mode="countdown";count.classList.add("show");const s=["3","2","1","GO!"];let i=0;count.textContent=s[i];const tick=()=>{i++;if(i>=s.length){count.classList.remove("show");reset();return}count.textContent=s[i];setTimeout(tick,i===s.length-1?520:720)};setTimeout(tick,720)}
+function pause(){if(mode!=="play")return;mode="paused";pauseAt=performance.now();pauseBox.classList.remove("hidden");say("一時停止中")}function resume(){if(mode!=="paused")return;startAt+=performance.now()-pauseAt;pauseAt=0;mode="play";pauseBox.classList.add("hidden");say("再開！")}function retire(){if(mode!=="paused")return;pauseBox.classList.add("hidden");finish(false,true)}
+function update(dt){if(mode!=="play")return;elapsed=(performance.now()-startAt)/1000;if(elapsed>=G){elapsed=G;finish(false);return}msgTimer-=dt;if(msgTimer<=0)msg.classList.add("hide");const remain=G-elapsed;if(remain<=5&&!app.dataset.warned){app.dataset.warned="1";say("残り5秒！")}if(remain>5)app.dataset.warned="";timers.tiger-=dt;timers.bath-=dt;timers.spinach-=dt;timers.clock-=dt;if(timers.tiger<=0){add("tiger");timers.tiger=540}if(timers.bath<=0){add("bath");timers.bath=900}if(timers.spinach<=0){add("spinach");timers.spinach=1500}if(timers.clock<=0){addClockPair();timers.clock=10000}if(!special.boy15&&elapsed>=15){special.boy15=true;add("boy")}if(!special.boy30&&elapsed>=30){special.boy30=true;add("boy")}if(!special.boy45&&elapsed>=45){special.boy45=true;add("boy")}if(!special.wifi20&&elapsed>=20){special.wifi20=true;add("wifi")}if(!special.wifi40&&elapsed>=40){special.wifi40=true;add("wifi")}for(const o of [...objects]){if(o.removed)continue;o.age+=dt;o.x+=o.vx*dt/1000;o.y+=o.vy*dt/1000;if(o.type==="spinach"){o.y=H-o.r-16;o.tick+=dt;if(o.tick>=1500){o.tick=0;score-=600;say(MSG.spinachPenalty[0]+" -600");text(o.x,o.y,MSG.spinachPenalty[0])}}if(o.blinkMs)o.el.classList.toggle("blink",!active(o));if(o.type!=="spinach"&&active(o)&&collide(o)){hit(o);continue}if(o.type==="tiger"&&o.y-o.r>H+10){missObj(o);continue}if(o.type==="bath"&&o.y-o.r>H+10){remove(o);continue}if(o.type==="clock"&&o.x-o.r>W+10){remove(o);continue}if(o.type==="boy"&&o.x+o.r<-10){missObj(o);continue}if(o.type==="wifi"&&o.y+o.r<-10){missObj(o);continue}place(o)}objects=objects.filter(o=>!o.removed);hud()}
+function rank(){if(score<0)return["所詮文字","なぜか虎より言葉が荒れています。","😵"];if(score<=17000)return["文字ども","まだ虎に優しくできる余地があります。","🐯"];if(score<=18000)return["リスナー","虎の気持ちが少し分かってきました。","🐯"];if(score<=20000)return["優秀リスナー候補","かなり優しくできています。","✨"];return["優秀リスナー","虎も安心して近づいてきます。","🏆"]}
+function finish(gameOver=false,retired=false){if(mode!=="play"&&mode!=="paused")return;mode="result";if(score>high){high=Math.round(score);saveHigh(high);homeBest.textContent=fmt(high)}hud();const[r,c,e]=rank();result.classList.remove("hidden");resultLabel.textContent=retired?"RETIRED":"RESULT";resultTitle.textContent=retired?"リタイア":r;resultEmoji.textContent=retired?"🏳️":e;lockResultActions(true);renderResultExtra();submitScoreOnce().then(()=>loadRankings()).finally(()=>{lockResultActions(false);renderResultExtra()})}
+function loop(t){if(!last)last=t;const dt=Math.min(34,t-last);last=t;update(dt);requestAnimationFrame(loop)}
+function pos(ev){const touch=ev.touches&&ev.touches[0]?ev.touches[0]:ev.changedTouches&&ev.changedTouches[0]?ev.changedTouches[0]:ev,rect=app.getBoundingClientRect();return{x:clamp(touch.clientX-rect.left,0,W),y:clamp(touch.clientY-rect.top,0,H)}}
+function down(ev){if(ev.target&&ev.target.closest&&ev.target.closest("button"))return;if(mode!=="play")return;ev.preventDefault();const p=pos(ev);tapStart={x:p.x,y:p.y,t:Date.now()};player.x=p.x;player.y=p.y;player.visible=true;playerEl.classList.add("active","touch");placePlayer()}function move(ev){if(ev.target&&ev.target.closest&&ev.target.closest("button"))return;if(mode!=="play")return;ev.preventDefault();const p=pos(ev);player.x=p.x;player.y=p.y;player.visible=true;playerEl.classList.add("active");placePlayer()}function up(ev){if(ev.target&&ev.target.closest&&ev.target.closest("button"))return;if(mode!=="play")return;const p=pos(ev);player.x=p.x;player.y=p.y;playerEl.classList.remove("touch");placePlayer();if(tapStart){const dx=p.x-tapStart.x,dy=p.y-tapStart.y,dist=Math.sqrt(dx*dx+dy*dy),dur=Date.now()-tapStart.t;if(dist<16&&dur<260)tapSpinach(p.x,p.y)}tapStart=null}
+function bind(el,fn){if(!el)return;let lt=0;el.addEventListener("touchend",e=>{e.preventDefault();lt=Date.now();fn(e)},{passive:false});el.addEventListener("click",e=>{if(Date.now()-lt<650)return;fn(e)})}
+function toggleRules(){rules.classList.toggle("hidden");rulesBtn.textContent=rules.classList.contains("hidden")?"ルール説明":"ルールを閉じる"}
+
+function goHome(){
+  lockResultActions(false);
+  mode="home";
+  nameScreen.classList.add("hidden");
+  result.classList.add("hidden");
+  pauseBox.classList.add("hidden");
+  count.classList.remove("show");
+  home.classList.remove("hidden");
+  msg.classList.add("hide");
+  objects.forEach(o=>o.el.remove());
+  objects=[];
+  fx.innerHTML="";
+  player.visible=false;
+  playerEl.classList.remove("active","touch");
+  setupHome();
+  hud();
+}
+bind($("start"),startWithNameGate);bind($("retry"),startWithNameGate);bind($("nameOk"),confirmName);playerNameInput.addEventListener("keydown",e=>{if(e.key==="Enter")confirmName()});bind($("endGame"),goHome);bind($("pause"),pause);bind($("resume"),resume);bind($("retire"),retire);bind($("shareGame"),shareGame);bind($("shareResult"),shareResult);bind($("rulesBtn"),toggleRules);
+app.addEventListener("touchstart",down,{passive:false});app.addEventListener("touchmove",move,{passive:false});app.addEventListener("touchend",up,{passive:false});app.addEventListener("touchcancel",up,{passive:false});app.addEventListener("mousedown",down);app.addEventListener("mousemove",move);app.addEventListener("mouseup",up);window.addEventListener("mouseup",()=>{tapStart=null;playerEl.classList.remove("touch")});window.addEventListener("resize",resize);window.addEventListener("blur",()=>{tapStart=null;playerEl.classList.remove("touch")});window.addEventListener("orientationchange",()=>setTimeout(resize,250));
+
+function preventDefaultSafe(e){if(e&&e.cancelable)e.preventDefault()}
+document.addEventListener("gesturestart",preventDefaultSafe,{passive:false});
+document.addEventListener("gesturechange",preventDefaultSafe,{passive:false});
+document.addEventListener("gestureend",preventDefaultSafe,{passive:false});
+document.addEventListener("touchmove",e=>{if(e.touches&&e.touches.length>1)preventDefaultSafe(e)},{passive:false});
+document.addEventListener("contextmenu",preventDefaultSafe,{passive:false});
+let lastTapAt=0;
+document.addEventListener("touchend",e=>{
+  const now=Date.now();
+  if(now-lastTapAt<350)preventDefaultSafe(e);
+  lastTapAt=now;
+},{passive:false});
+document.addEventListener("dblclick",preventDefaultSafe,{passive:false});
+setupHome();resize();hud();requestAnimationFrame(loop);
+})();
+</script></body></html>
