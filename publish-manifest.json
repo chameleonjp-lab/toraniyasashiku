@@ -1,0 +1,18 @@
+{
+  "repository": "chameleonjp-lab/toraniyasashiku",
+  "runtimeFiles": ["index.html"],
+  "runtimeSHA256": "283475f7f8a3ce7a83139aef8d722e8fc1a8a7908c54e96896c5030f156169ab",
+  "inlineSources": {
+    "tora-client-core": "client-core.cjs",
+    "tora-audio": "audio.cjs",
+    "tora-i18n": "i18n.cjs",
+    "tora-presentation": "presentation.cjs",
+    "normal-score-ack8": "normal-score-ack8.js",
+    "tora-catalog": "locales.json"
+  },
+  "externalRuntime": ["https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"],
+  "thumbnail": {"status": "pending", "reason": "An actual-game screenshot and social metadata will be reviewed after publication. No fabricated image is declared."},
+  "canonicalURL": "https://chameleonjp.codeberg.page/torani_yasashiku/",
+  "canonicalSwitch": "Only after the owner merges, Pages publishes and the actual new game URL is verified.",
+  "deployment": "No workflow is added. The owner must confirm the existing Pages source and publication settings before merging."
+}
