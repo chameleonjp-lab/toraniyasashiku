@@ -13,7 +13,7 @@ const scripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
 test('the public candidate preserves the reviewed runtime bytes',()=>{
   assert.deepEqual(manifest.runtimeFiles,['index.html']);
   assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),manifest.runtimeSHA256);
-  assert.equal(manifest.runtimeSHA256,'28635d9d53220cd8e50c8683e87982e115723b168ff379a93511663709e62bca');
+  assert.equal(manifest.runtimeSHA256,'3dcc9a532ea79b42a01817c2859da18e9fb570e882b8bce9fcd713b072877126');
 });
 test('standalone editable sources match the scripts actually included in the page',()=>{
   for(const [id,file] of Object.entries(manifest.inlineSources)){
@@ -38,7 +38,7 @@ test('15 catalogs and unchanged game identity are explicit',()=>{
   assert.ok(html.includes('const GAME_SLUG="torani_yasashiku";'));
   assert.ok(html.includes(manifest.canonicalURL));
   assert.ok(html.includes('ranking.html?game=torani_yasashiku'));
-  for(const locale of Object.keys(catalog))assert.equal(catalog[locale].boyReaction,null,'unresolved legacy phrase remains documented, not falsely translated');
+  for(const locale of Object.keys(catalog))assert.equal(typeof catalog[locale].boyReaction,'string','localized three-second reward notice');
 });
 test('missing social image is pending, never a declared broken local asset',()=>{
   const images=[...html.matchAll(/<meta\b[^>]*(?:property|name)=["'](?:og:image|twitter:image)["'][^>]*>/g)];
