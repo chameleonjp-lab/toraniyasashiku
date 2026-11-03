@@ -19,7 +19,9 @@
 
 通常ACKは `accepted / result_normalized_name / result_display_name / result_first_score / result_best_score / result_play_count / is_first_play / is_new_best` の8列です。9列の別wrapperを仮定しません。検証は固定した送信名前・点数を使い、サーバーの名前比較はU+0020の前後除去だけを扱います。新規入力の点数範囲と既存履歴のint4範囲を区別します。
 
-これは応答の整合性検証であり、永続保存のreadback、同名別人の識別、本人認証、送信の冪等性の保証ではありません。現ランキング表示には従来の数値文字列変換とscore/name別名fallbackが残っています。`rank_no` 修正によってこの別のスキーマ境界まで厳密になったとは説明しません。
+これは応答の整合性検証であり、永続保存のreadback、同名別人の識別、本人認証、送信の冪等性の保証ではありません。応答にゲームslug自体は返らないため、ゲーム同一性の証明でもありません。
+
+ランキング点数の後続修正では、ベスト欄は `best_score`、初回欄は `first_score` のみを採用します。数値型のint4整数（-2147483648〜2147483647）だけを表示し、実際の0・負数はそのまま保持します。null・欠落・数値文字列・真偽値・小数・非有限値・範囲外は `—` で、`score` / `result_*` / 別タブの値で補完しません。実際に使うインライン表示関数と編集用ソースを一致させ、未使用の旧 `rowScore` も同じ境界にそろえています。`rank_no`・同点・順序・上限30件・RPC名・ゲーム採点は変更しません。名前の旧別名fallbackは残っており、通常6列全体の厳密なスキーマ検証や本人識別まで完了したとは主張しません。
 
 匿名開始の計測は公開スコアと別契約です。このPRでは推測した計測エンドポイントやDB変更を追加しません。実験場側の集計・匿名ポリシー・実スコア連携は、適切な契約確認と関連PRで追跡します。
 
@@ -31,12 +33,13 @@
 
 ```sh
 node test/rpc-rank-no.test.cjs
+node test/ranking-score-strict.test.cjs
 node test/normal8-actual-caller.test.cjs
 node test/participation.test.cjs
 node test/public-stage.test.cjs
 ```
 
-最初の3本は順位24・通常ACK18・参加状態11の合計53ケースです。最後は固定runtime、インラインソースとの一致、実行しない構文検査、言語と識別子、画像pendingの静的境界を確認します。これは端末・全UI・APIの結合試験ではありません。
+最後の静的検査を除く4本は順位24・厳密な点数境界40・通常ACK18・参加状態11の合計93ケースです。最後は固定runtime、インラインソースとの一致、実行しない構文検査、言語と識別子、画像pendingの静的境界を確認します。これは端末・全UI・APIの結合試験ではありません。
 
 ## 公開・連携の残件
 
@@ -45,7 +48,7 @@ node test/public-stage.test.cjs
 - [ ] 実ゲーム画面からサムネイルを作り、OG/Twitterメタ情報を実URLと合わせて設定。現状は画像・SNSメタ情報が未完で、架空画像や存在しない画像URLは宣言しません。画像は公開後の修正でも対応可能です。
 - [ ] 公開確認後に正式URLを統一。確認前は `https://chameleonjp.codeberg.page/torani_yasashiku/` を維持します。
 - [ ] 実験場の既存 `torani_yasashiku` エントリーと共有情報を更新する関連PR。ゲーム内は詳細ランキング `ranking.html?game=torani_yasashiku` を参照しますが、実験場側のリンク変更完了とは扱いません。
-- [ ] 匿名開始計測の契約、実スコア連携、本人識別・冪等性、ランキングの厳密なscore schemaを別途確認。
+- [ ] 匿名開始計測の契約、実スコア連携、本人識別・冪等性、通常ランキングの実API応答と残る名前・行全体の検証境界を別途確認。
 - [ ] iPhone Safariの縦横・IME・キーボード・実音・復帰・X動作、15言語の自然さと未翻訳反応文を確認。
 
 ロールバックが必要な場合はPRの親コミットを参照し、ownerが確認したrevertで戻します。既存の履歴・保存データを削除せず、DBを巻き戻しません。

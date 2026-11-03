@@ -36,8 +36,8 @@
       const rows=Array.isArray(data)?data:[];
       if(rows.length)return title+rows.slice(0,30).map(row=>{
         const name=row.display_name||row.player_name||row.name||tr.t('unnamed');
-        const score=kind==='first'?(row.first_score??row.score??row.result_first_score):(row.best_score??row.score??row.result_best_score);
-        const scoreText=(typeof score==='number'||(typeof score==='string'&&score.trim()!==''))?number(score,tr):'—';
+        const score=kind==='first'?row.first_score:row.best_score;
+        const scoreText=Number.isInteger(score)&&score>=-2147483648&&score<=2147483647?tr.format(score):'—';
         return '<div class="rankLine">'+escape(tr.t('rankRow',{rank:Number.isSafeInteger(row.rank_no)&&row.rank_no>0?tr.format(row.rank_no):'—',name,score:scoreText}))+'</div>';
       }).join('');
       body=escape(tr.t('noRecords'));
