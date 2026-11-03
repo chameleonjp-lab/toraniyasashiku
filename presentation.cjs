@@ -50,13 +50,11 @@
     const fixed=Object.freeze({'一時停止中':'paused','再開！':'resumed','残り5秒！':'fiveSeconds','虎に優しく':'initialMessage','🐯 虎を落とした… -3000点':'tigerMiss','👦🏻 逃した… -2秒':'boyMiss','🛜 配信できない！ -3000':'wifiMiss'});
     if(Object.hasOwn(fixed,message))return tr.t(fixed[message])??message;
     if(message===sourceMessages.spinachPenalty[0]+' -600')return tr.t('spinachPenalty')+' '+tr.format(-600);
-    const groups={tiger:['tiger1','tiger2','tiger3'],bath:['bath1','bath2','bath3'],spinachTap:['spinachTap'],spinachPenalty:['spinachPenalty'],clock:['clockReaction'],wifi:['wifi1','wifi2','wifi3']};
+    const groups={tiger:['tiger1','tiger2','tiger3'],bath:['bath1','bath2','bath3'],spinachTap:['spinachTap'],spinachPenalty:['spinachPenalty'],clock:['clockReaction'],boy:['boyReaction'],wifi:['wifi1','wifi2','wifi3']};
     for(const [group,keys] of Object.entries(groups)){
       const index=sourceMessages[group].indexOf(message);
       if(index>=0&&keys[index])return tr.t(keys[index])??message;
     }
-    // The original boy reaction is intentionally not rewritten while its
-    // meaning-preserving translation is unresolved.
     return message;
   }
   return Object.freeze({escape,result,ranking,notice});
