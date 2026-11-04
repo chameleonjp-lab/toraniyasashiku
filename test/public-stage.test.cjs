@@ -13,7 +13,7 @@ const scripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
 test('the public candidate preserves the reviewed runtime bytes',()=>{
   assert.deepEqual(manifest.runtimeFiles,['index.html']);
   assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),manifest.runtimeSHA256);
-  assert.equal(manifest.runtimeSHA256,'3dcc9a532ea79b42a01817c2859da18e9fb570e882b8bce9fcd713b072877126');
+  assert.equal(manifest.runtimeSHA256,'ec37dd50bf36245eb45d82856a8bfb0667b58c52c4d8c753c300a0a9793f4419');
 });
 test('standalone editable sources match the scripts actually included in the page',()=>{
   for(const [id,file] of Object.entries(manifest.inlineSources)){

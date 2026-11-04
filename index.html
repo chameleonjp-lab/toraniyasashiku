@@ -2052,7 +2052,15 @@ const sb=window.supabase&&SUPABASE_PUBLISHABLE_KEY&&!SUPABASE_PUBLISHABLE_KEY.in
 const KEY="torani_yasashiku_high_score",G=60,TIGER_BATH_MIN_GAP=8,OBJ={tiger:["🐯",28,"tiger"],bath:["🛁",29,"bath"],spinach:["🥬",27,"spinach"],clock:["🕗",28,"clock"],boy:["👦🏻",28,"boy"],wifi:["🛜",30,"wifi"]},SPD={tiger:351,bath:316,clock:190,wifi:-330,boy:-243},MSG={tiger:["もっと愛して！","優秀リスナー！","配信きてね！"],bath:["風呂は嫌だ！","風呂キャン上等","入ってないよ？"],spinachTap:["誰が食うんや！"],spinachPenalty:["雑草だろ"],clock:["予定は嫌い！"],boy:["3秒ゲット！"],wifi:["配信できない！","ツイッチみて！","サブスク入って！"]};
 let W=320,H=480,mode="home",last=0,startAt=0,elapsed=0,pauseAt=0,score=0,high=loadHigh(),drop=0,objects=[],nextId=1,player={x:0,y:0,r:28,visible:false},msgTimer=0,tapStart=null,counts={},special={},timers={},laneCounts={tiger:[0,0,0],bath:[0,0,0],spinach:[0,0,0]},playerName="",scoreSubmitted=false,lastSubmitInfo=null,rankState={active:"best",best:null,first:null};
 const rand=(a,b)=>a+Math.random()*(b-a),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),choice=a=>a[Math.floor(Math.random()*a.length)],fmt=n=>translator.format(Math.round(n));
-function loadHigh(){try{const ks=[KEY,"torani_yasashiku_high_dom_v10","torani_yasashiku_high_dom_v7","torani_yasashiku_high_dom_v5","torani_yasashiku_best_score_dom_v4","torani_yasashiku_best_score_v2"];return Math.max(...ks.map(k=>Number(localStorage.getItem(k)||0)).filter(n=>!isNaN(n)))}catch(e){return 0}}function saveHigh(v){try{localStorage.setItem(KEY,String(v))}catch(e){}}
+function loadHigh(strict=false){try{const ks=[KEY,"torani_yasashiku_high_dom_v10","torani_yasashiku_high_dom_v7","torani_yasashiku_high_dom_v5","torani_yasashiku_best_score_dom_v4","torani_yasashiku_best_score_v2"];return Math.max(...ks.map(k=>Number(localStorage.getItem(k)||0)).filter(n=>!isNaN(n)))}catch(e){if(strict)throw e;return 0}}
+function saveHigh(v){
+  try{
+    // Unknown stored values must never be replaced with a lower in-memory best.
+    const next=Math.max(high,v,loadHigh(true));
+    high=next;
+    localStorage.setItem(KEY,String(next));
+  }catch(e){}
+}
 function url(){return PUBLIC_URL}function showToast(t){toast.textContent=t;toast.classList.add("show");setTimeout(()=>toast.classList.remove("show"),1000)}
 async function writeClip(t){if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(t);return}const a=document.createElement("textarea");a.value=t;a.setAttribute("readonly","");a.style.position="fixed";a.style.left="-9999px";a.style.top="0";document.body.appendChild(a);a.focus();a.select();const ok=document.execCommand("copy");a.remove();if(!ok)throw new Error("copy failed")}
 async function copy(t,n="クリップボードにコピーしました"){try{await writeClip(t);showToast(n);copyStatus.textContent=n;setTimeout(()=>copyStatus.textContent="",1000)}catch(e){showToast("コピーできませんでした");copyStatus.textContent="コピーできませんでした";setTimeout(()=>copyStatus.textContent="",1000)}}
