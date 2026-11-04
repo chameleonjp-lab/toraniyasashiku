@@ -1,7 +1,7 @@
 {
   "repository": "chameleonjp-lab/toraniyasashiku",
   "runtimeFiles": ["index.html"],
-  "runtimeSHA256": "3dcc9a532ea79b42a01817c2859da18e9fb570e882b8bce9fcd713b072877126",
+  "runtimeSHA256": "ec37dd50bf36245eb45d82856a8bfb0667b58c52c4d8c753c300a0a9793f4419",
   "inlineSources": {
     "tora-client-core": "client-core.cjs",
     "tora-audio": "audio.cjs",

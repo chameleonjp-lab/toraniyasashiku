@@ -23,6 +23,7 @@ jobs:
           node test/rpc-rank-no.test.cjs
           node test/normal8-actual-caller.test.cjs
           node test/participation.test.cjs
+          node test/best-storage.test.cjs
           node test/public-stage.test.cjs
           node test/pages-package.test.cjs
       - name: Copy only the verified runtime into a new temporary directory
